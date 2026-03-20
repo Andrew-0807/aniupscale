@@ -204,6 +204,7 @@ class AniUpscaleApp(ctk.CTk):
 
         self._cfg = load_config()
         self._settings_open = False
+        self._mpv_proc = None
 
         self._build_header()
         self._build_body()
@@ -340,13 +341,31 @@ class AniUpscaleApp(ctk.CTk):
             "<FocusOut>",
             lambda _e: self._on_ep_change(),
         )
+        self._ep_entry.bind(
+            "<Return>",
+            lambda _e: self._on_ep_change(),
+        )
+
+        self._next_btn = _TactileButton(
+            ep_row,
+            text="\u25b6 Next",
+            font=_font(11),
+            fg_color=C["accent_mute"],
+            hover_color=C["accent"],
+            text_color=C["txt"],
+            width=70,
+            height=34,
+            corner_radius=6,
+            command=self._on_next_episode,
+        )
+        self._next_btn.grid(row=0, column=1, padx=(8, 0))
 
         ctk.CTkLabel(
             ep_row,
             text="(blank = first)",
             font=_font(10),
             text_color=C["txt3"],
-        ).grid(row=0, column=1, padx=(8, 0))
+        ).grid(row=0, column=2, padx=(8, 0))
 
         # ── Status bar ─────────────────────────────────────────────────────
         st_card = _Card(body)
@@ -649,6 +668,17 @@ class AniUpscaleApp(ctk.CTk):
         self._cfg["episode"] = ep
         self._flush_cfg()
 
+        # Sync URL fragment if it contains #ep=N
+        url = self.url_entry.get()
+        if ep and re.search(r"#ep=\d+", url):
+            new_url = re.sub(r"#ep=\d+", f"#ep={ep}", url)
+            self.url_entry.delete(0, "end")
+            self.url_entry.insert(0, new_url)
+        elif ep and re.search(r"#ep=", url):
+            new_url = re.sub(r"#ep=", f"#ep={ep}", url)
+            self.url_entry.delete(0, "end")
+            self.url_entry.insert(0, new_url)
+
     def _on_watch(self):
         url = self.url_entry.get().strip()
         if not url:
@@ -684,7 +714,7 @@ class AniUpscaleApp(ctk.CTk):
 
         def _worker():
             try:
-                run_pipeline(
+                proc = run_pipeline(
                     url=url,
                     mpv_path=mpv_path,
                     ytdlp_path=ytdlp_path,
@@ -695,6 +725,7 @@ class AniUpscaleApp(ctk.CTk):
                     episode=ep_from_url,
                     lang=self._cfg.get("lang", "sub"),
                 )
+                self._mpv_proc = proc
                 self.after(0, lambda: self._set_status("mpv launched", _ST_OK))
             except PipelineError as exc:
                 msg = str(exc)
@@ -705,3 +736,55 @@ class AniUpscaleApp(ctk.CTk):
                 )
 
         threading.Thread(target=_worker, daemon=True).start()
+
+    def _kill_mpv(self):
+        """Kill the running mpv process if any."""
+        if self._mpv_proc and self._mpv_proc.poll() is None:
+            try:
+                self._mpv_proc.terminate()
+            except OSError:
+                pass
+            try:
+                self._mpv_proc.kill()
+            except OSError:
+                pass
+        self._mpv_proc = None
+
+    def _on_next_episode(self):
+        """Increment episode, update URL, kill old mpv, and relaunch."""
+        # Get current episode
+        ep_str = self._ep_entry.get().strip()
+        try:
+            current_ep = int(ep_str) if ep_str else 0
+        except ValueError:
+            current_ep = 0
+
+        next_ep = current_ep + 1
+
+        # Update episode entry and config
+        self._ep_entry.delete(0, "end")
+        self._ep_entry.insert(0, str(next_ep))
+        self._cfg["episode"] = str(next_ep)
+
+        # Update URL fragment
+        url = self.url_entry.get()
+        if re.search(r"#ep=\d+", url):
+            new_url = re.sub(r"#ep=\d+", f"#ep={next_ep}", url)
+        elif re.search(r"#ep=", url):
+            new_url = re.sub(r"#ep=", f"#ep={next_ep}", url)
+        elif "#" in url:
+            # URL has other fragment, replace it
+            new_url = re.sub(r"#.*$", f"#ep={next_ep}", url)
+        else:
+            # No fragment, append one
+            new_url = f"{url}#ep={next_ep}"
+
+        self.url_entry.delete(0, "end")
+        self.url_entry.insert(0, new_url)
+        self._flush_cfg()
+
+        # Kill existing mpv
+        self._kill_mpv()
+
+        # Relaunch
+        self._on_watch()

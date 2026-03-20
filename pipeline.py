@@ -113,11 +113,12 @@ def launch_mpv(
     stream_url: str,
     shader_arg: Optional[str],
     config_dir: Optional[str] = None,
-) -> None:
+) -> subprocess.Popen:
     """Spawn mpv as a fully detached process (non-blocking).
 
     config_dir: path to folder containing mpv.conf and input.conf.
                 Falls back to built-in defaults if not provided.
+    Returns the Popen handle for lifecycle management.
     """
     cmd = [mpv_path]
 
@@ -142,13 +143,13 @@ def launch_mpv(
         if sys.platform == "win32":
             DETACHED_PROCESS = 0x00000008
             CREATE_NEW_PROC_GROUP = 0x00000200
-            subprocess.Popen(
+            proc = subprocess.Popen(
                 cmd,
                 creationflags=DETACHED_PROCESS | CREATE_NEW_PROC_GROUP,
                 close_fds=True,
             )
         else:
-            subprocess.Popen(cmd, start_new_session=True, close_fds=True)
+            proc = subprocess.Popen(cmd, start_new_session=True, close_fds=True)
     except FileNotFoundError:
         raise PipelineError(
             f"mpv not found at '{mpv_path}'. "
@@ -156,6 +157,8 @@ def launch_mpv(
         )
     except OSError as exc:
         raise PipelineError(f"Failed to launch mpv: {exc}")
+
+    return proc
 
 
 # ── Orchestrator ───────────────────────────────────────────────────────────
@@ -169,8 +172,9 @@ def run_pipeline(
     status_cb: Optional[Callable[[str], None]] = None,
     episode: Optional[str] = None,
     lang: str = "sub",
-) -> None:
-    """Resolve URL then launch mpv.  Raises PipelineError on any failure."""
+) -> subprocess.Popen:
+    """Resolve URL then launch mpv.  Raises PipelineError on any failure.
+    Returns the mpv Popen handle."""
     _cb = status_cb or (lambda _: None)
 
     # 1. Direct stream URL — pass straight to mpv
@@ -192,4 +196,4 @@ def run_pipeline(
     _config_dir = os.path.join(os.path.dirname(__file__), "mpv")
     if not os.path.isdir(_config_dir):
         _config_dir = None
-    launch_mpv(mpv_path, stream_url, shader_arg, config_dir=_config_dir)
+    return launch_mpv(mpv_path, stream_url, shader_arg, config_dir=_config_dir)
