@@ -1,0 +1,3 @@
+# Python 3.10+  required
+customtkinter>=5.2.2
+# yt-dlp and mpv are external binaries — install them separately (see README).
