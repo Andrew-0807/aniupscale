@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="icon.png" alt="AniUpscale" width="120">
+
 # AniUpscale
 
 **Real-time anime upscaling for your desktop.**
