@@ -10,6 +10,7 @@ Design follows taste-skill principles:
 
 from __future__ import annotations
 import os
+import re
 import threading
 from pathlib import Path
 from tkinter import filedialog
@@ -654,6 +655,17 @@ class AniUpscaleApp(ctk.CTk):
             self._set_status("Error: URL field is empty.", _ST_ERR)
             return
 
+        # Extract episode from URL fragment (#ep=N) for AnimeKai links
+        ep_match = re.search(r"#ep=(\d+)", url)
+        if ep_match:
+            ep_from_url = ep_match.group(1)
+            # Update episode entry and config
+            self._ep_entry.delete(0, "end")
+            self._ep_entry.insert(0, ep_from_url)
+            self._cfg["episode"] = ep_from_url
+        else:
+            ep_from_url = self._cfg.get("episode") or None
+
         mpv_path, ytdlp_path, shaders_dir = self._collect_paths()
 
         self._cfg["last_url"] = url
@@ -680,7 +692,7 @@ class AniUpscaleApp(ctk.CTk):
                     status_cb=lambda m: self.after(
                         0, lambda msg=m: self._set_status(msg, _ST_WORK)
                     ),
-                    episode=self._cfg.get("episode") or None,
+                    episode=ep_from_url,
                     lang=self._cfg.get("lang", "sub"),
                 )
                 self.after(0, lambda: self._set_status("mpv launched", _ST_OK))
