@@ -455,7 +455,8 @@ class AniUpscaleApp(ctk.CTk):
             row=row, column=0, columnspan=2, sticky="ew", padx=14, pady=(0, 6)
         )
         self._qual_var = ctk.StringVar(value=self._cfg.get("quality", "Quality"))
-        for i, (q, lbl) in enumerate(QUALITY_LABELS.items()):
+        _qual_items = list(QUALITY_LABELS.items())
+        for i, (q, lbl) in enumerate(_qual_items):
             ctk.CTkRadioButton(
                 qual_inner,
                 text=lbl,
@@ -474,7 +475,7 @@ class AniUpscaleApp(ctk.CTk):
                 column=0,
                 sticky="w",
                 padx=12,
-                pady=(8 if i == 0 else 2, 8 if i == 2 else 2),
+                pady=(8 if i == 0 else 2, 8 if i == len(_qual_items) - 1 else 2),
             )
         row += 1
 

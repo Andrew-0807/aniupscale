@@ -49,6 +49,35 @@ SHADER_PRESETS: Dict[Tuple[str, str], List[str]] = {
         "Anime4K_Clamp_Highlights.glsl",
         "Anime4K_Upscale_CNN_x2_L.glsl",
     ],
+    # ── Extended tiers ────────────────────────────────────────────────────
+    ("A", "Ultra"): [
+        "Anime4K_Clamp_Highlights.glsl",
+        "Anime4K_Restore_CNN_VL.glsl",
+        "Anime4K_Upscale_CNN_x2_VL.glsl",
+    ],
+    ("A", "Extreme"): [
+        "Anime4K_Clamp_Highlights.glsl",
+        "Anime4K_Restore_CNN_UL.glsl",
+        "Anime4K_Upscale_CNN_x2_UL.glsl",
+    ],
+    ("B", "Ultra"): [
+        "Anime4K_Clamp_Highlights.glsl",
+        "Anime4K_Restore_CNN_Soft_VL.glsl",
+        "Anime4K_Upscale_CNN_x2_VL.glsl",
+    ],
+    ("B", "Extreme"): [
+        "Anime4K_Clamp_Highlights.glsl",
+        "Anime4K_Restore_CNN_Soft_UL.glsl",
+        "Anime4K_Upscale_CNN_x2_UL.glsl",
+    ],
+    ("C", "Ultra"): [
+        "Anime4K_Clamp_Highlights.glsl",
+        "Anime4K_Upscale_CNN_x2_VL.glsl",
+    ],
+    ("C", "Extreme"): [
+        "Anime4K_Clamp_Highlights.glsl",
+        "Anime4K_Upscale_CNN_x2_UL.glsl",
+    ],
 }
 
 MODE_LABELS: Dict[str, str] = {
@@ -58,9 +87,11 @@ MODE_LABELS: Dict[str, str] = {
 }
 
 QUALITY_LABELS: Dict[str, str] = {
-    "Fast": "Fast     — S-size shaders, real-time on most GPUs",
-    "Balanced": "Balanced — M-size shaders, good quality/performance",
-    "Quality": "Quality  — L-size shaders, best result, needs strong GPU",
+    "Fast": "Fast     — S-size, real-time on most GPUs",
+    "Balanced": "Balanced — M-size, good quality/performance",
+    "Quality": "Quality  — L-size, needs decent GPU",
+    "Ultra": "Ultra    — VL-size, best quality, needs strong GPU",
+    "Extreme": "Extreme  — UL-size, maximum quality, very demanding",
 }
 
 

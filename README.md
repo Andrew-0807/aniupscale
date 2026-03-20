@@ -147,11 +147,11 @@ AniUpscale resolves the stream via built-in plugins or yt-dlp, then launches mpv
 
 ### Shader Presets
 
-| Preset | Fast (S) | Balanced (M) | Quality (L) |
-|--------|----------|--------------|-------------|
-| **Mode A** — Restore + Upscale | Clamp + Restore\_S + Upscale\_S | Clamp + Restore\_M + Upscale\_M | Clamp + Restore\_L + Upscale\_L |
-| **Mode B** — Soft Restore + Upscale | Clamp + SoftRestore\_S + Upscale\_S | Clamp + SoftRestore\_M + Upscale\_M | Clamp + SoftRestore\_L + Upscale\_L |
-| **Mode C** — Upscale Only | Clamp + Upscale\_S | Clamp + Upscale\_M | Clamp + Upscale\_L |
+| Preset | Fast (S) | Balanced (M) | Quality (L) | Ultra (VL) | Extreme (UL) |
+|--------|----------|--------------|-------------|------------|--------------|
+| **Mode A** — Restore + Upscale | Clamp + Restore\_S + Upscale\_S | Clamp + Restore\_M + Upscale\_M | Clamp + Restore\_L + Upscale\_L | Clamp + Restore\_VL + Upscale\_VL | Clamp + Restore\_UL + Upscale\_UL |
+| **Mode B** — Soft Restore + Upscale | Clamp + SoftRestore\_S + Upscale\_S | Clamp + SoftRestore\_M + Upscale\_M | Clamp + SoftRestore\_L + Upscale\_L | Clamp + SoftRestore\_VL + Upscale\_VL | Clamp + SoftRestore\_UL + Upscale\_UL |
+| **Mode C** — Upscale Only | Clamp + Upscale\_S | Clamp + Upscale\_M | Clamp + Upscale\_L | Clamp + Upscale\_VL | Clamp + Upscale\_UL |
 
 ---
 
